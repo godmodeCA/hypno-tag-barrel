@@ -1,0 +1,7 @@
+Size: S
+Softness: SSS
+Skill: C
+Rhythm: B
+Mommy: F
+Special: F
+Hypno: B

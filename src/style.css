@@ -1,0 +1,597 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Luckiest+Guy&family=Nunito:wght@300;400;600;700&display=swap');
+:root {
+  /* Font roles */
+  --font-ui: 'Nunito', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: 'Bebas Neue', system-ui, sans-serif;
+  --font-nickname: 'Luckiest Guy', 'Bebas Neue', system-ui, sans-serif;
+  --font-body: 'Nunito', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  /* Global defaults */
+  font-family: var(--font-ui);
+  color: #ffffff;
+  background-color: #000000;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* === MAIN BACKGROUND === */
+
+.tag-root {
+  width: 100vw;
+  height: 100vh;
+  background:
+    radial-gradient(circle at 50% 85%, rgba(255, 255, 255, 0.18), #000 60%),
+    linear-gradient(to top, #000 55%, #111 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* We'll toggle this class when a character is focused */
+.tag-root--focus {
+  /* no extra styles here yet; just used as a hook */
+}
+
+/* === 3D STAGE VIEW === */
+
+.tag-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  perspective: 1600px;
+}
+
+/* Floor spotlight ellipse */
+.tag-spotlight {
+  position: absolute;
+  bottom: 8%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 55%;
+  max-width: 1100px;
+  height: 24%;
+  max-height: 260px;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 255, 255, 0.42),
+    rgba(0, 0, 0, 0.95) 70%
+  );
+  filter: blur(16px);
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+/* === 3D RING === */
+
+.tag-ring {
+  position: relative;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+  transition: transform 0.7s ease-in-out;
+}
+
+/* Each character card on the ring */
+.tag-panel {
+  position: absolute;
+  top: -300px;
+  left: -220px;
+  transform-style: preserve-3d;
+}
+
+/* Character sprite on ring (billboarded) */
+.tag-panel-image {
+  max-height: 600px;
+  height: 600px;
+  object-fit: contain;
+  filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.8));
+  transition:
+    opacity 0.4s ease,
+    transform 0.4s ease,
+    filter 0.2s ease;
+}
+
+/* Hover emphasis (only really visible in ring mode) */
+.tag-panel-image:hover {
+  filter: drop-shadow(0 26px 40px rgba(0, 0, 0, 0.95));
+}
+
+/* When focusing: fade out all non-selected characters */
+.tag-root--focus .tag-panel-image {
+  opacity: 0;
+}
+
+/* Keep the selected one visible */
+.tag-root--focus .tag-panel-image--selected {
+  opacity: 1;
+}
+
+/* === ARROWS === */
+
+.tag-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 60px;
+  height: 60px;
+  border-radius: 999px;
+  border: none;
+  background: rgba(0, 0, 0, 0.55);
+  color: #ffffff;
+  font-size: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    transform 0.1s,
+    opacity 0.2s;
+}
+
+.tag-arrow[disabled] {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.tag-arrow-left {
+  left: 80px;
+}
+
+.tag-arrow-right {
+  right: 80px;
+}
+
+.tag-arrow:hover:not([disabled]) {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.tag-arrow:active:not([disabled]) {
+  transform: translateY(-50%) scale(0.95);
+}
+
+/* === FOCUS / BIO OVERLAY (RIGHT SIDE) === */
+
+.tag-focus-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  /* Symmetric padding so content centers on screen, while still leaving room for the character */
+  padding: 70px 360px 90px 360px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 32px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+
+/* Fade in when focused */
+.tag-root--focus .tag-focus-overlay {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+
+
+.tag-focus-title {
+  font-size: 38px;
+  margin: 0 0 16px;
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.8);
+}
+
+.tag-focus-text {
+  font-size: 18px;
+  line-height: 1.6;
+  color: #e6e6e6;
+  margin-bottom: 28px;
+}
+
+/* Back button */
+.tag-focus-back {
+  padding: 10px 22px;
+  border-radius: 999px;
+  border: none;
+  background: #ffffff;
+  color: #111;
+  font-family: var(--font-ui);
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.7);
+  transition:
+    background 0.2s ease,
+    transform 0.08s ease;
+}
+
+
+.tag-focus-back:hover {
+  background: #f3f3f3;
+}
+
+.tag-focus-back:active {
+  transform: scale(0.96);
+}
+
+/* === BIO HEADER (TOP-LEFT) === */
+.tag-bio-header {
+  position: absolute;
+  top: 70px;
+  left: 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  pointer-events: none;
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.8);
+}
+
+.tag-bio-name {
+  font-family: var(--font-display);
+  font-size: 42px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #ffc4da;
+}
+
+.tag-bio-subtitle {
+  font-family: var(--font-nickname);
+  font-size: 24px;
+  font-weight: 400;
+  color: #ffffff;
+  font-style: normal;       /* usually better with this font */
+  letter-spacing: 0.03em;
+  opacity: 0.9;
+}
+
+
+
+/* Biography + radar top row */
+.tag-bio-top-row {
+  width: 100%;
+  max-width: 1200px;   /* a bit narrower so the group sits tighter */
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;   /* center the bio+radar as a group */
+  align-items: flex-start;
+  gap: 40px;                 /* space between bio and radar */
+  margin-left: 450px;
+}
+
+
+.tag-bio-main {
+  flex: 1;
+  max-width: 760px;
+}
+
+.tag-bio-radar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.tag-bio-radar img {
+  display: block;
+  width: 260px;
+  max-width: 100%;
+  height: auto;
+  filter: drop-shadow(0 18px 40px rgba(0, 0, 0, 0.85));
+}
+
+/* === BIOGRAPHY LAYOUT === */
+
+
+.tag-bio-main {
+  max-width: 760px;
+}
+
+.tag-bio-text {
+  font-family: var(--font-body);
+  font-size: 18px;
+  line-height: 1.7;
+  color: #e6e6e6;
+  margin: 0 0 12px;
+}
+
+.tag-bio-text:last-child {
+  margin-bottom: 0;
+}
+
+/* Bottom card container (stats/ability) + back button */
+.tag-bio-bottom {
+  margin-top: auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+
+/* White dossier-style card */
+.tag-bio-card {
+  width: 720px;
+  max-width: 100%;
+  background: #fdfdfd;
+  color: #111111;
+  border-radius: 4px;
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.75),
+    0 0 0 1px rgba(0, 0, 0, 0.8);
+  border: 1px solid rgba(0, 0, 0, 0.85);
+  overflow: hidden;
+  font-family: var(--font-body);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Generic strip rows inside the card */
+.tag-bio-strip {
+  border-top: 1px solid rgba(0, 0, 0, 0.8);
+  padding: 8px 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  letter-spacing: 0.03em;
+}
+
+.tag-bio-strip:first-child {
+  border-top: none;
+}
+
+/* Header strip: NAME / ABILITY */
+.tag-bio-strip--header {
+  justify-content: space-between;
+}
+
+.tag-bio-header-cell {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+/* Stats strip becomes a vertical grid container */
+.tag-bio-strip--stats {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+}
+
+/* Two 3-cell rows + final HYPNO row */
+.tag-bio-stat-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px 12px;
+}
+
+.tag-bio-stat-row--single {
+  grid-template-columns: 1fr;
+}
+
+.tag-bio-stat-cell {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+/* Description strip */
+.tag-bio-strip--desc {
+  justify-content: flex-start;
+}
+
+.tag-bio-strip-label {
+  font-family: var(--font-display);
+  font-weight: 700;
+  margin-right: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.tag-bio-strip-value {
+  font-weight: 500;
+}
+
+.tag-bio-strip-value--muted {
+  opacity: 0.75;
+  font-style: italic;
+}
+
+.tag-bio-strip-desc {
+  font-family: var(--font-body);
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* === MOBILE LAYOUT (phones) === */
+@media (max-width: 900px) {
+  /* Allow full-page scrolling on mobile */
+  html,
+  body,
+  #root {
+    height: auto;
+    min-height: 100%;
+    overflow-y: auto;
+  }
+
+  /* Root becomes a scrollable column instead of a locked 100vh box */
+  .tag-root {
+    width: 100%;
+    height: auto;
+    min-height: 100vh;
+    align-items: center;         /* was flex-start */
+    justify-content: center;     /* was flex-start */
+    padding: 16px 0 32px;
+    overflow-y: auto; /* overrides the earlier overflow: hidden vertically */
+  }
+
+  /* In focus mode on mobile, align from the top so the profile layout feels natural */
+  .tag-root--focus {
+    align-items: flex-start;
+    justify-content: flex-start;
+  }
+
+  /* Stage becomes vertical, centered content */
+  .tag-stage {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    perspective: 1200px;
+  }
+
+  /* Normalize panel size on mobile so every girl is truly centered */
+  .tag-panel {
+    position: absolute;
+    top: -300px;
+
+    /* Fixed width so the ring's center line is consistent for all characters */
+    width: 420px;
+    height: 600px;
+
+    /* Center the panel around the ring origin (0,0) */
+    left: -210px; /* -width / 2 */
+
+    transform-style: preserve-3d;
+
+    /* Center the sprite inside the panel */
+    display: flex;
+    justify-content: center;   /* horizontal centering */
+    align-items: flex-end;     /* feet toward bottom of panel */
+  }
+
+  /* When focused on mobile, align from the top so the profile layout feels natural */
+  .tag-root--focus .tag-stage {
+    justify-content: flex-start;
+  }
+
+  /* In focus on mobile, hide the 3D ring and arrows.
+     We'll show a flat hero image instead */
+  .tag-root--focus .tag-ring,
+  .tag-root--focus .tag-arrow {
+    display: none;
+  }
+
+  /* Mobile hero block: centered character at the top of the profile page */
+  .tag-mobile-hero {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+
+  .tag-mobile-hero-image {
+    width: 80%;
+    max-width: 420px;
+    height: auto;
+    filter: drop-shadow(0 22px 40px rgba(0, 0, 0, 0.9));
+  }
+
+  /* Spotlight is cool on desktop but gets in the way on mobile */
+  .tag-spotlight {
+    display: none;
+  }
+
+  /* Arrows smaller and closer to the edges */
+  .tag-arrow {
+    width: 44px;
+    height: 44px;
+    font-size: 28px;
+    top: 55%;
+  }
+
+  .tag-arrow-left {
+    left: 12px;
+  }
+
+  .tag-arrow-right {
+    right: 12px;
+  }
+
+/* Larger sprite base size on mobile; we then zoom further in JS */
+  .tag-panel-image {
+    height: 420px;
+    max-height: 420px;
+  }
+
+  /* Name + title become centered header instead of fixed top-left */
+  .tag-bio-header {
+    position: static;
+    margin-top: 12px;
+    margin-bottom: 4px;
+    align-items: center;
+    text-align: center;
+  }
+
+  .tag-bio-name {
+    font-size: 32px;
+  }
+
+  .tag-bio-subtitle {
+    font-size: 18px;
+  }
+
+  /* Focus overlay becomes a normal column you can scroll through */
+  .tag-focus-overlay {
+    position: static;
+    padding: 16px 16px 32px;
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    height: auto;
+  }
+
+  /* BIO then RADAR stacked vertically = your desired order */
+  .tag-bio-top-row {
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    max-width: 100%;
+    margin-left: 0;
+    gap: 20px;
+  }
+
+  .tag-bio-main {
+    max-width: 100%;
+  }
+
+  .tag-bio-radar img {
+    width: 220px;
+  }
+
+  /* Card (NAME / ABILITY / STATS / DESC) fills width under radar */
+  .tag-bio-card {
+    width: 100%;
+  }
+
+  .tag-bio-bottom {
+    align-items: stretch;
+  }
+
+  /* Center the Back button */
+  .tag-focus-back {
+    align-self: center;
+  }
+}
